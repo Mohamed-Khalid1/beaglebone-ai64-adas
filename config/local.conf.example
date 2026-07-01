@@ -1,0 +1,147 @@
+# CONF_VERSION is increased each time build/conf/ changes incompatibly
+CONF_VERSION = "2"
+
+# ---------------------------------------------------------------------------
+# Download and cache directories
+# ---------------------------------------------------------------------------
+DL_DIR = "/home/mohamedkhalid/yocto-bbai64/build/downloads"
+SSTATE_DIR = "/home/mohamedkhalid/yocto-bbai64/sstate-cache"
+
+# Build output (tmp)
+TMPDIR = "${TOPDIR}/yocto-disk/tmp"
+
+# ---------------------------------------------------------------------------
+# Machine and distro
+# ---------------------------------------------------------------------------
+MACHINE = "beaglebone-ai64"
+DISTRO  = "arago"
+
+# Brand selects graphics + accelerator stack.
+#  - "core"   : minimal, no GPU/GLES, clean uEnv (dorprocboot=0). Used for
+#               bbai64-minimal-image / tisdk-base-image.
+#  - "edgeai" : enables opengl/wayland + virtual/libgles2 (Qt/Weston) AND the
+#               edgeai uEnv (dorprocboot=1 + k3-j721e-edgeai-apps.dtbo) that
+#               loads the C71x/MMA firmware. REQUIRED to build tisdk-edgeai-image.
+# Switched to "edgeai" 2026-06-13 to build tisdk-edgeai-image (AI accel + Qt).
+# Switched back to "core" 2026-06-19 to rebuild bbai64-minimal-image exactly
+# (core branding → no :edgeai override → minimal uEnv dorprocboot=0 + graphics stripped).
+# Switched to "edgeai" 2026-06-19 to rebuild tisdk-edgeai-image (AI accel + Qt).
+ARAGO_BRAND = "edgeai"
+
+# ---------------------------------------------------------------------------
+# Package format
+# ---------------------------------------------------------------------------
+PACKAGE_CLASSES = "package_ipk"
+
+# ---------------------------------------------------------------------------
+# Build parallelism (adjust to nproc on your host)
+# ---------------------------------------------------------------------------
+# Bumped 2→6 on 2026-06-19 to speed up the minimal rebuild. Safe on this host
+# (12 logical cores / 15 GiB RAM): half the cores, ample RAM headroom, no OOM risk.
+BB_NUMBER_THREADS = "1"
+PARALLEL_MAKE = "-j2"
+
+# Delete each recipe's WORKDIR after it builds to keep the slow HDD from
+# filling up (do_unpack/work trees are the bulk of TMPDIR growth).
+INHERIT += "rm_work"
+
+# ---------------------------------------------------------------------------
+# Output image formats
+#   wic.xz  — compressed flashable image for bmaptool / dd
+#   wic.bmap — block-map for fast sparse flash
+#   tar.xz  — rootfs tarball (useful for inspect / NFS)
+# ---------------------------------------------------------------------------
+IMAGE_FSTYPES = "wic.xz wic.bmap tar.xz"
+
+# ---------------------------------------------------------------------------
+# TI firmware licence acceptance (required for K3 SYSFW boot blobs)
+# ---------------------------------------------------------------------------
+LICENSE_FLAGS_ACCEPTED = "ti-tspa synaptics-killswitch"
+
+# ---------------------------------------------------------------------------
+# Boot files (wic boot partition)
+# CORRECTION (2026-06-19): beaglebone-ai64 (J721E) uses SPLIT boot, NOT combined.
+# The R5 SPL inside tiboot3.bin loads the system firmware from a file named
+# EXACTLY "sysfw.itb" in the FAT boot partition. The earlier "fix" that dropped
+# sysfw.itb made an unbootable SD: tiboot3 ran but the SPL stalled before any LED
+# (board appeared "dead" — see bbai64-wont-boot-hardware in memory). j721e.inc's
+# bare "sysfw.itb" entry can be absent at wic time (do_image_wic "cannot stat"),
+# so instead copy the always-present, identical board firmware AS sysfw.itb.
+# ---------------------------------------------------------------------------
+IMAGE_BOOT_FILES:remove = "sysfw.itb"
+IMAGE_BOOT_FILES:append = " sysfw-j721e-gp-evm.itb;sysfw.itb"
+
+# ---------------------------------------------------------------------------# Distro features — brand-conditional graphics
+#   arago.conf adds "wayland opengl" by default.
+#   - core   brand (minimal/base images): strip ALL graphics to stay small.
+#   - edgeai brand (tisdk-edgeai-image): KEEP wayland+opengl so the TI Rogue GPU
+#     driver provides virtual/egl + virtual/libgles2 for Qt6/Weston.
+#   x11/vulkan/opencl stripped in both cases (we use Wayland; not needed).
+# ---------------------------------------------------------------------------
+DISTRO_FEATURES:remove = "x11 vulkan opencl ${@'wayland opengl' if d.getVar('ARAGO_BRAND') == 'core' else ''}"
+
+# ---------------------------------------------------------------------------
+# Image features: empty-password root + dropbear SSH for development
+# ---------------------------------------------------------------------------
+EXTRA_IMAGE_FEATURES = "debug-tweaks"
+
+# Exclude the heavier OpenSSH server; dropbear is installed by the image recipe
+IMAGE_INSTALL:remove = "packagegroup-core-ssh-openssh"
+PACKAGE_EXCLUDE += "openssh"
+
+# ---------------------------------------------------------------------------
+# ADAS runtime dep (YOCTO_IMAGE_REQUIREMENTS §2): MQTT client for the edgeai app.
+# Everything else it needs (numpy/opencv/pyyaml/pillow + onnxruntime TIDL EP) is
+# already in the edgeai image; only paho-mqtt was missing. Scoped to the edgeai
+# image so it doesn't bloat the minimal image.
+# ---------------------------------------------------------------------------
+IMAGE_INSTALL:append:pn-tisdk-edgeai-image = " python3-paho-mqtt"
+
+# ---------------------------------------------------------------------------
+# SDK host architecture
+# ---------------------------------------------------------------------------
+SDKMACHINE = "x86_64"
+
+# ---------------------------------------------------------------------------
+# Disk-space safety monitor
+# (raises STOPTASKS before free space hits the floor)
+# ---------------------------------------------------------------------------
+BB_DISKMON_DIRS ??= "\
+    STOPTASKS,${TMPDIR},2G,100K \
+    STOPTASKS,${DL_DIR},1G,100K \
+    STOPTASKS,${SSTATE_DIR},1G,100K \
+    HALT,${TMPDIR},500M,1K \
+    HALT,${DL_DIR},100M,1K \
+    HALT,${SSTATE_DIR},100M,1K \
+"
+
+# ---------------------------------------------------------------------------
+# Build history and hash-equivalence (speed up re-runs)
+# ---------------------------------------------------------------------------
+INHERIT += "buildhistory"
+BUILDHISTORY_COMMIT = "1"
+
+BB_SIGNATURE_HANDLER = "OEEquivHash"
+BB_HASHSERVE = "auto"
+
+# Remove work directories after packaging to save disk space
+INHERIT += "rm_work"
+
+# Keep only the latest image set in the deploy directory
+RM_OLD_IMAGE = "1"
+
+# ---------------------------------------------------------------------------
+# Misc
+# ---------------------------------------------------------------------------
+BB_GENERATE_MIRROR_TARBALLS = "0"
+PATCHRESOLVE = "noop"
+USER_CLASSES ?= "buildstats"
+TERMCMD = "${XTERM_TERMCMD}"
+TERMCMDRUN = "${XTERM_TERMCMDRUN}"
+# PR service DISABLED. We flash full .wic images, not incremental package feeds,
+# so the PR service adds no value — and on an intentional SDK *downgrade*
+# (11.02 -> 11.00, e.g. openssl 3.2.6 -> 3.2.4) it raises fatal
+# "version-going-backwards / would break package feeds" QA errors at
+# do_packagedata. Leaving it off avoids that entire failure class.
+# PRSERV_HOST = "localhost:0"
+PRSERV_HOST = ""

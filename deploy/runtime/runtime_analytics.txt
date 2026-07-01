@@ -1,0 +1,82 @@
+========================================================
+  BBAI-64 RUNTIME ANALYTICS (YOLO + UFLDv2, TIDL)
+========================================================
+
+  Source         : image
+  Frames         : 1
+  Wall time      : 4.12 s
+  Avg FPS        : 0.24  (frames / wall time; pipelined)
+  Avg C7x util   : 0.0 %  (duty cycle; see note below)
+  Memory (RSS MB): 208.5 avg / 208.5 peak
+  Tensor bits    : INT8
+  Per-frame KPIs : runtime_kpis.csv
+
+── Instantaneous FPS (per-frame throughput) ────────────
+  fps: N/A
+
+── Inference-bound FPS ceiling (1000 / c7x_ms) ─────────
+  fps ceiling:
+    min : 0.267
+    max : 0.267
+    avg : 0.267
+    p95 : 0.267
+    p99 : 0.267
+
+── C7x occupancy (%, duty cycle = busy / frame interval) ─
+  c7x util: N/A
+
+── A72 preprocess latency (ms, stage A) ────────────────
+  preprocess:
+    min : 7.846
+    max : 7.846
+    avg : 7.846
+    p95 : 7.846
+    p99 : 7.846
+
+── YOLO C7x latency (ms) ───────────────────────────────
+  yolo infer:
+    min : 1167.803
+    max : 1167.803
+    avg : 1167.803
+    p95 : 1167.803
+    p99 : 1167.803
+
+── UFLD C7x latency (ms) ───────────────────────────────
+  ufld infer:
+    min : 2576.108
+    max : 2576.108
+    avg : 2576.108
+    p95 : 2576.108
+    p99 : 2576.108
+
+── Depth A72 latency (ms, geometric monocular ranging) ─
+  depth est:
+    min : 0.026
+    max : 0.026
+    avg : 0.026
+    p95 : 0.026
+    p99 : 0.026
+
+── Combined C7x latency (ms, all models, one engine) ───
+  yolo+ufld:
+    min : 3743.911
+    max : 3743.911
+    avg : 3743.911
+    p95 : 3743.911
+    p99 : 3743.911
+
+── A72 decode+composite latency (ms, stage C) ──────────
+  decode+comp:
+    min : 365.155
+    max : 365.155
+    avg : 365.155
+    p95 : 365.155
+    p99 : 365.155
+
+  NOTE: 'C7x util' is a TIME duty cycle (fraction of each frame's
+  wall interval the engine was computing), not silicon MMA-array
+  occupancy. 100% ⇒ C7x is the bottleneck; <100% ⇒ source/CPU-
+  limited with MMA headroom. For true MMA compute %, use TIDL
+  perfsim / graph stats at compile time.
+
+========================================================

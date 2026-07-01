@@ -1,0 +1,40 @@
+# --- large / regenerable artifacts (fetched via deploy/fetch_artifacts.sh) ---
+deploy/artifacts/
+deploy/models/
+*.onnx
+*.pt
+*.tar
+*.tar.gz
+*.tar.xz
+
+# --- build outputs / images ---
+*.wic
+*.wic.xz
+*.wic.bmap
+*.img
+tmp/
+deploy-ti/
+build/tmp*/
+
+# --- calibration image sets (only samples/sample.jpg is tracked) ---
+deploy/calib/
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# --- model weights kept out of git ---
+models/twinlitenet/pretrained/
+
+# --- personal helper, not part of the project (stays local) ---
+GITHUB_UPLOAD_GUIDE.md
+
+# --- editor / OS ---
+.vscode/
+.DS_Store
+*.swp
+*.log

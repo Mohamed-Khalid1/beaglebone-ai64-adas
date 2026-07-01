@@ -1,0 +1,5 @@
+# Assign static IP to the USB gadget interface the moment it appears.
+# Works both at boot (if cable is plugged in) and on hot-plug.
+ACTION=="add", SUBSYSTEM=="net", KERNEL=="usb0", \
+    RUN+="/sbin/ip addr add 192.168.7.2/24 dev usb0", \
+    RUN+="/sbin/ip link set usb0 up"

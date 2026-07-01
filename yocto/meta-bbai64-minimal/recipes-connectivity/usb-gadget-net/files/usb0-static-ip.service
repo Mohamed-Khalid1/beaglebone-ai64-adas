@@ -1,0 +1,19 @@
+[Unit]
+Description=Assign static IP 192.168.7.2 to USB gadget usb0
+# Tie this unit's lifecycle to the usb0 network device:
+#   BindsTo → stop if the device goes away; After → run once the device exists.
+BindsTo=sys-subsystem-net-devices-usb0.device
+After=sys-subsystem-net-devices-usb0.device
+
+[Service]
+Type=oneshot
+# '|| true' on the addr add so a re-run (address already present) is not a failure.
+ExecStart=/bin/sh -c '/sbin/ip addr add 192.168.7.2/24 dev usb0 || true'
+ExecStart=/sbin/ip link set usb0 up
+RemainAfterExit=yes
+
+[Install]
+# Start at boot (usb0 exists from module load with legacy g_ether) and also
+# whenever the usb0 device appears.
+WantedBy=multi-user.target
+WantedBy=sys-subsystem-net-devices-usb0.device

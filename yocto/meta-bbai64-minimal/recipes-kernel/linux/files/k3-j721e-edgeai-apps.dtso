@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * edgeai-apps: device-tree overlay for BeagleBone AI-64 (J721E).
+ *
+ * Puts both main R5F clusters in split mode (each core boots its own
+ * firmware, as the TI EdgeAI/vision-apps firmware expects) and installs the
+ * TI vision-apps reserved-memory map so the j7-*-fw remoteproc images load.
+ *
+ * Copyright (C) 2019 - 2021 Texas Instruments Incorporated - http://www.ti.com/
+ */
+
+/dts-v1/;
+/plugin/;
+
+&main_r5fss0 {
+	ti,cluster-mode = <0>;
+};
+
+&main_r5fss1 {
+	ti,cluster-mode = <0>;
+};
+
+#include "k3-j721e-rtos-memory-map.dtsi"

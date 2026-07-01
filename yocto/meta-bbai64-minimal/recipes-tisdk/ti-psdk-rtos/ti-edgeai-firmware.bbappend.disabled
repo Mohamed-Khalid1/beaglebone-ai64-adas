@@ -1,0 +1,59 @@
+# ti-edgeai-firmware.bbappend — OPTION 1: surgical C7x firmware override.
+#
+# ============================================================================
+# WHAT THIS DOES
+#   Replaces ONLY the C7x firmware blob (vx_app_rtos_linux_c7x_1.out) with a
+#   version-matched 11.01.06 build (TIDL net version 0x20250821) that matches our
+#   11.01 runtime (arm-tidl REL.TIDL.11.01.06.00, ti-tidl.bbappend) and 11.01
+#   models (edgeai-tidl-models.bbappend -> EDGEAI_SDK_VERSION 11_01_00). All other
+#   cores (mcu2_0/mcu2_1/c6x_1/c6x_2) keep the stock psdk_fw blob — only the C7x
+#   runs TIDL and only the C7x firmware does the net-version check, so it is the
+#   only blob that must move.
+#
+# WHY A FILE OVERLAY AND NOT AN SRCREV BUMP
+#   psdk_fw.git serves net 0x20250437 at EVERY ref (main HEAD and all 11.x tags;
+#   confirmed during investigation). TI never published the 0x20250821 j721e firmware to
+#   psdk_fw — it ships only inside the full Processor SDK Linux EdgeAI 11.01 image.
+#   So there is no SRCREV that fetches it; we overlay the blob extracted from that
+#   SDK. The base recipe's do_install() then signs it (same TI_SECURE_DEV_PKG keys
+#   as every other core) and installs both .out and .out.signed, and the existing
+#   update-alternatives wiring (j7-c71_0-fw -> C7X_1_FW) is untouched. No new
+#   secure-boot risk: identical signing path to the blob it replaces.
+#
+# HOW TO GET THE BLOB  (see ti-edgeai-firmware-get-c7x.sh next to this file):
+#   Extract /usr/lib/firmware/vision_apps_eaik/vx_app_rtos_linux_c7x_1.out from the
+#   TI EdgeAI SDK 11.01 target filesystem, then MANDATORY verify net version:
+#       od -A d -t x1 -N 4 vx_app_rtos_linux_c7x_1.out   # MUST be: 21 08 25 20
+#   and drop it at:
+#       meta-bbai64-minimal/recipes-tisdk/ti-psdk-rtos/files/vx_app_rtos_linux_c7x_1.out
+#
+# A wrong/stale blob cannot slip through: the do_install:prepend guard below
+# bbfatal's unless the overlay file is present AND its first 4 bytes are 0x20250821.
+# ============================================================================
+
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+# Overlay only for the edgeai brand (this board). Other brands/machines untouched.
+SRC_URI:append:edgeai = " file://vx_app_rtos_linux_c7x_1.out"
+
+# Replace the git C7x blob with our version-matched one BEFORE the base do_install
+# signs + installs it. Guarded so a missing/wrong blob fails the build loudly.
+do_install:prepend:edgeai () {
+    overlay="${WORKDIR}/vx_app_rtos_linux_c7x_1.out"
+    if [ ! -f "$overlay" ]; then
+        bbfatal "Option-1 firmware overlay missing: $overlay not found. \
+Place the 11.01.06 C7x blob (net 0x20250821) at \
+meta-bbai64-minimal/recipes-tisdk/ti-psdk-rtos/files/vx_app_rtos_linux_c7x_1.out \
+(see ti-edgeai-firmware-get-c7x.sh)."
+    fi
+    # First 4 bytes (LE) = TIDL net version. Want 0x20250821 -> bytes 21 08 25 20.
+    ver=$(od -A n -t x1 -N 4 "$overlay" | tr -d ' \n')
+    if [ "$ver" != "21082520" ]; then
+        bbfatal "Option-1 firmware overlay has wrong TIDL net version (first 4 bytes \
+= $ver, expected 21082520 = 0x20250821). This blob will NOT match the 11.01 \
+models/runtime. Re-extract the correct vx_app_rtos_linux_c7x_1.out from the TI \
+EdgeAI SDK 11.01 image."
+    fi
+    cp -f "$overlay" "${S}/${FW_DIR}/${C7X_1_FW}"
+    bbnote "Option-1: C7x firmware overridden with net-0x20250821 blob (was psdk_fw acdb1854/0x20250437)"
+}

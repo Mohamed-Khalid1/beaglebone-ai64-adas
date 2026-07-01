@@ -1,0 +1,23 @@
+# uEnv.txt for BeagleBone AI-64 (TISDK 11.00 / edgeai image), SD-card boot.
+#
+# Why this file exists:
+#   The stock meta-arago uEnv.txt is empty, so the BeagleBoard.org U-Boot
+#   (u-boot-bb.org) runs "bootflow scan", finds the eMMC's extlinux.conf and
+#   boots eMMC instead of this SD card. By setting "uenvcmd", U-Boot's "envboot"
+#   runs it (before the bootflow scan) and boots the TI way from the SD card.
+#
+#   bootcmd_ti_mmc loads ${bootdir}/${name_kern} (=/boot/Image) and
+#   ${bootdir}/dtb/${fdtfile} from ${bootpart}. The kernel + dtb live on the
+#   ext4 rootfs (partition 2), so bootpart must be 1:2, not the default 1:1
+#   (the FAT boot partition has no kernel).
+
+bootpart=1:2
+fdtfile=ti/k3-j721e-beagleboneai64.dtb
+
+# Apply the TI EdgeAI overlay (built by meta-beaglebone-ai64-edgeai-sdk-11-00-fix's linux-bb.org
+# bbappend). It puts the main R5F clusters in split mode and replaces the
+# remote-core reserved-memory map with TI's vision-apps layout so the
+# j7-*-fw firmware loads (fixes "bad phdr"/-22 remoteproc failures).
+name_overlays=ti/k3-j721e-edgeai-apps.dtbo
+
+uenvcmd=run bootcmd_ti_mmc

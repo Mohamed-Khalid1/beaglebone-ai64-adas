@@ -1,0 +1,2 @@
+frame,t_wall_s,pre_ms,yolo_ms,ufld_ms,depth_ms,c7x_ms,post_ms,frame_interval_ms,fps_inst,fps_infer_ceiling,c7x_occupancy_pct,rss_mb,n_dets,n_lanes
+0,4.121,7.846,1167.803,2576.108,0.026,3743.911,365.155,,,0.27,,208.5,1,0
