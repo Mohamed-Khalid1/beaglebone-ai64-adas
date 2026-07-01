@@ -20,11 +20,11 @@ The prebuilt C7x firmware expects its carveout at one physical address
 (`0xb2…`) while the kernel device tree reserved a different region (`0xa8…`). With the
 regions mismatched the DSP either won't load or faults immediately.
 **Fix:** a device-tree carveout that matches the firmware's expected map —
-[`.../recipes-kernel/linux/files/k3-j721e-rtos-memory-map.dtsi`](../yocto/meta-bbai64-minimal/recipes-kernel/linux/files/k3-j721e-rtos-memory-map.dtsi),
+[`.../recipes-kernel/linux/files/k3-j721e-rtos-memory-map.dtsi`](../yocto/meta-bbai64/recipes-kernel/linux/files/k3-j721e-rtos-memory-map.dtsi),
 plus enabling the remoteproc character device
-([`remoteproc-cdev.cfg`](../yocto/meta-bbai64-minimal/recipes-kernel/linux/files/remoteproc-cdev.cfg))
+([`remoteproc-cdev.cfg`](../yocto/meta-bbai64/recipes-kernel/linux/files/remoteproc-cdev.cfg))
 and the EdgeAI apps overlay
-([`k3-j721e-edgeai-apps.dtso`](../yocto/meta-bbai64-minimal/recipes-kernel/linux/files/k3-j721e-edgeai-apps.dtso)).
+([`k3-j721e-edgeai-apps.dtso`](../yocto/meta-bbai64/recipes-kernel/linux/files/k3-j721e-edgeai-apps.dtso)).
 
 ### 3. **DSP timer contention** — the subtle one
 After the memory map was fixed, the C66/C7x cores booted and reported "running", but

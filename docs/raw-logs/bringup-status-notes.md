@@ -181,12 +181,12 @@ Replaces ONLY the C7x blob with the version-matched 11.01.06 firmware (TIDL net
   and the update-alternatives wiring (`j7-c71_0-fw`) is untouched → no new secure-boot
   risk.
 - **Files written:**
-  - `meta-bbai64-minimal/recipes-tisdk/ti-psdk-rtos/ti-edgeai-firmware.bbappend` —
+  - `meta-bbai64/recipes-tisdk/ti-psdk-rtos/ti-edgeai-firmware.bbappend` —
     `SRC_URI:append:edgeai = file://vx_app_rtos_linux_c7x_1.out`; `do_install:prepend`
     copies the overlay over the git blob BEFORE signing, with a **build-time guard**
     that bbfatal's unless the file exists AND its first 4 bytes = `21 08 25 20`
     (0x20250821). A wrong/stale blob cannot slip through.
-  - `meta-bbai64-minimal/recipes-tisdk/ti-psdk-rtos/ti-edgeai-firmware-get-c7x.sh` —
+  - `meta-bbai64/recipes-tisdk/ti-psdk-rtos/ti-edgeai-firmware-get-c7x.sh` —
     extracts `vision_apps_eaik/vx_app_rtos_linux_c7x_1.out` from a TI EdgeAI SDK 11.01
     archive (.wic.xz / rootfs .tar.xz / unpacked installer) and **verifies** net
     0x20250821 before staging it into `files/`.
@@ -199,7 +199,7 @@ Replaces ONLY the C7x blob with the version-matched 11.01.06 firmware (TIDL net
 All Phase 2-4 DT fixes (which previously lived ONLY on card DTB `f1771a17`) are now
 in the recipe, derived **by diffing the stock built DTB against the on-card f1771a17**.
 - **Files written:**
-  - `meta-bbai64-minimal/recipes-kernel/linux/files/bbai64-vision-fixups.dtsi` — a DT
+  - `meta-bbai64/recipes-kernel/linux/files/bbai64-vision-fixups.dtsi` — a DT
     fragment using full-path overrides (`&{/path}`, no label guessing): timers
     `2400000`–`2450000` reserved; `r5fss@5c00000` cluster-mode 0x01→0x00 (split);
     `r5f@5d00000` (mcu2_1) memory-region re-pointed to the a4 regions; `r5fss@5e00000`
@@ -208,7 +208,7 @@ in the recipe, derived **by diffing the stock built DTB against the on-card f177
     `vision-apps-shared-a@ac000000` (64M), `-b@b0000000` (32M),
     `vision-apps-ddr-{mcu2-0@d9,mcu2-1@da,c6x-1@dc,c6x-2@e0}000000` (16M each, no-map),
     and `vision_apps_shared-memories` dma-heap-carveout @ 0xb3000000 (172M).
-  - `meta-bbai64-minimal/recipes-kernel/linux/linux-bb.org_%.bbappend` — appends the
+  - `meta-bbai64/recipes-kernel/linux/linux-bb.org_%.bbappend` — appends the
     fragment in `do_configure:prepend` AFTER the existing C66/C71 carveout sed; idempotent,
     with a landing guard.
 - **VALIDATION (done this phase, no on-board retest needed):** simulated the bake
@@ -228,7 +228,7 @@ real filename on the page, it changes per point release):
 # TI page: https://www.ti.com/tool/PROCESSOR-SDK-J721E  -> EDGE AI
 # CDN dir: https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/  (pick 11.01.xx)
 # Then point the script at the .wic.xz / rootfs .tar.xz / unpacked installer:
-/home/mohamedkhalid/tisdk/sources/meta-bbai64-minimal/recipes-tisdk/ti-psdk-rtos/ti-edgeai-firmware-get-c7x.sh \
+/home/mohamedkhalid/tisdk/sources/meta-bbai64/recipes-tisdk/ti-psdk-rtos/ti-edgeai-firmware-get-c7x.sh \
     /path/to/<edgeai-sdk-11.01-artifact>
 # Must end with: [OK] staged verified firmware ... net 0x20250821
 ```
@@ -306,7 +306,7 @@ LD_PRELOAD interception + objdump:
   → its `io.bin` is **94616 bytes**, compiled with **TIDL tools 11_01_06_00**
   (exactly matching the pinned arm-tidl 11.01.06). **Version-aligned.**
 - **Permanent recipe fix WRITTEN**:
-  `meta-bbai64-minimal/recipes-tisdk/edgeai-components/edgeai-tidl-models.bbappend`
+  `meta-bbai64/recipes-tisdk/edgeai-components/edgeai-tidl-models.bbappend`
   overrides `do_fetch` to use `EDGEAI_SDK_VERSION=11_01_00` for the edgeai brand.
 - **On-device compilation is NOT possible** — `tidl_model_import_onnx.so` (the
   x86-only TIDL compiler) is absent; `TIDLCompilationProvider` silently falls back
@@ -549,7 +549,7 @@ board off USB — avoid; read versions statically from the firmware blob instead
    remoteproc refuses to load. Same for C66 DSPs.
 5. **Built corrected DTB** (carveout relocation: C7x 0xa8→0xb2, C66_1 0xa7→0xa9,
    C66_0 0xa6→0xa8), swapped onto card, rebooted → **C7x + C66s come up running**.
-6. **Baked the fix** into `meta-bbai64-minimal/recipes-kernel/linux/linux-bb.org_%.bbappend`
+6. **Baked the fix** into `meta-bbai64/recipes-kernel/linux/linux-bb.org_%.bbappend`
    (sed-based, with bbfatal guard).
 
 ### Phase 2 (2026-06-21): TIDL inference + R5F IPC mesh
@@ -648,7 +648,7 @@ Already in `local.conf`. Just needs `bitbake tisdk-edgeai-image` (user runs manu
 | local.conf | `ARAGO_BRAND="edgeai"`, `MACHINE=beaglebone-ai64` |
 | TMPDIR | `${TOPDIR}/yocto-disk/tmp` (loop45 ext4, ~50 GB free) |
 | Deploy dir | On `/` (~20 GB free) |
-| Custom layer | `sources/meta-bbai64-minimal/` (priority 14) |
+| Custom layer | `sources/meta-bbai64/` (priority 14) |
 
 ### IPv6 link-local rescue (when IPv4 is broken)
 ```bash

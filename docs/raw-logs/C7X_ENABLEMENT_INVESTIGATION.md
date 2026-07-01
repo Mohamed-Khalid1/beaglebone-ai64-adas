@@ -95,7 +95,7 @@ runtime, deps, RAM/storage) — this memory-map alignment is the last, hard piec
 Add the vision_apps reserved-memory regions (`0xb2…` C7x, and the matching C66/R5/
 DDR-heap regions) to the BeagleBone AI-64 DT and point each remoteproc node's
 `memory-region` at them, so Linux remoteproc can load the stock firmware. Implement
-as a `.dtsi`/overlay patch in a kernel `.bbappend` in `meta-bbai64-minimal`. Needs the
+as a `.dtsi`/overlay patch in a kernel `.bbappend` in `meta-bbai64`. Needs the
 **full** vision_apps J721E memory map (from TI's PSDK `j721e` linker/RM config), not
 just the C7x slice. This is the closest to how TI's EVM DT is built.
 
@@ -141,7 +141,7 @@ phandle/label (`c66_0_memory_region`, `c71_0_memory_region`, …) so the
 (c66_0=0xa8, c66_1=0xa9, ipc=0xaa, c7x=0xb2).
 
 ### Files created
-- **`sources/meta-bbai64-minimal/recipes-kernel/linux/linux-bb.org_%.bbappend`**
+- **`sources/meta-bbai64/recipes-kernel/linux/linux-bb.org_%.bbappend`**
   — `do_configure:prepend` sed-relocates the carveouts in
   `k3-j721e-beagleboneai64.dts`, with a `bbfatal` guard if the dts format
   differs. Permanent fix; rebuild the kernel to bake it in. **Touches only the

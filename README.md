@@ -52,7 +52,7 @@ python3 runtime/yolo_runtime.py --image samples/sample.jpg   # single-frame demo
 
 ```bash
 # 1. Drop the custom layer into your SDK and add it to bblayers.conf
-cp -r yocto/meta-bbai64-minimal  <TISDK>/sources/
+cp -r yocto/meta-bbai64  <TISDK>/sources/
 
 # 2. Use the pinned build config (edit the 3 host paths at the top)
 cp config/local.conf.example  <TISDK>/build/conf/local.conf
@@ -82,7 +82,7 @@ Login is `root` with an **empty password** (`debug-tweaks`). Details + IPv6 resc
 |---|---|
 | [`docs/`](docs/) | Engineering narrative — start at [`01-overview.md`](docs/01-overview.md) |
 | [`docs/raw-logs/`](docs/raw-logs/) | Primary-source session logs (appendix) |
-| [`yocto/meta-bbai64-minimal/`](yocto/meta-bbai64-minimal/) | The custom Yocto layer (both images, USB gadget, C7x DT, uEnv) |
+| [`yocto/meta-bbai64/`](yocto/meta-bbai64/) | The custom Yocto layer (both images, USB gadget, C7x DT, uEnv) |
 | [`config/`](config/) | The exact `local.conf` + the `ARAGO_BRAND` brand-toggle explainer |
 | [`scripts/`](scripts/) | Flash the SD card, connect to the board over USB-C |
 | [`deploy/`](deploy/) | Model export → compile (x86) → C7x runtime + `fetch_artifacts.sh` |

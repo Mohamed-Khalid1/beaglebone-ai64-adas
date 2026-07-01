@@ -32,7 +32,7 @@ So the board accepts **neither too-old nor too-new** nets. Only the exact
 2. **On-device runtime** — the `onnxruntime` TIDL EP shipped in the image.
    Early mismatch: an **11.02 model** (io.bin 378392 B) against an **11.01
    runtime/firmware** (94616 B) failed. Fixed by pinning the SDK model version in
-   [`edgeai-tidl-models.bbappend`](../yocto/meta-bbai64-minimal/recipes-tisdk/edgeai-components/edgeai-tidl-models.bbappend)
+   [`edgeai-tidl-models.bbappend`](../yocto/meta-bbai64/recipes-tisdk/edgeai-components/edgeai-tidl-models.bbappend)
    → `EDGEAI_SDK_VERSION = 11_01_00`, and building the whole image on the 11.00 SDK.
 3. **x86 compile tools** — must be the `J721E_1100_06` edgeai-tidl-tools release, the
    only one that stamps `0x20250429`.

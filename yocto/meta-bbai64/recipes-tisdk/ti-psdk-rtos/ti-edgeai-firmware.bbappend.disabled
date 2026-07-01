@@ -25,7 +25,7 @@
 #   TI EdgeAI SDK 11.01 target filesystem, then MANDATORY verify net version:
 #       od -A d -t x1 -N 4 vx_app_rtos_linux_c7x_1.out   # MUST be: 21 08 25 20
 #   and drop it at:
-#       meta-bbai64-minimal/recipes-tisdk/ti-psdk-rtos/files/vx_app_rtos_linux_c7x_1.out
+#       meta-bbai64/recipes-tisdk/ti-psdk-rtos/files/vx_app_rtos_linux_c7x_1.out
 #
 # A wrong/stale blob cannot slip through: the do_install:prepend guard below
 # bbfatal's unless the overlay file is present AND its first 4 bytes are 0x20250821.
@@ -43,7 +43,7 @@ do_install:prepend:edgeai () {
     if [ ! -f "$overlay" ]; then
         bbfatal "Option-1 firmware overlay missing: $overlay not found. \
 Place the 11.01.06 C7x blob (net 0x20250821) at \
-meta-bbai64-minimal/recipes-tisdk/ti-psdk-rtos/files/vx_app_rtos_linux_c7x_1.out \
+meta-bbai64/recipes-tisdk/ti-psdk-rtos/files/vx_app_rtos_linux_c7x_1.out \
 (see ti-edgeai-firmware-get-c7x.sh)."
     fi
     # First 4 bytes (LE) = TIDL net version. Want 0x20250821 -> bytes 21 08 25 20.

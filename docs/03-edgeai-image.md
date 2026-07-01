@@ -16,7 +16,7 @@ The two images share one tree; `ARAGO_BRAND` selects between them (see
   Everything else the app needs (numpy/opencv/pyyaml/pillow + the onnxruntime TIDL EP)
   is already in the EdgeAI image.
 
-Image customization: [`.../recipes-core/images/tisdk-edgeai-image.bbappend`](../yocto/meta-bbai64-minimal/recipes-core/images/tisdk-edgeai-image.bbappend)
+Image customization: [`.../recipes-core/images/tisdk-edgeai-image.bbappend`](../yocto/meta-bbai64/recipes-core/images/tisdk-edgeai-image.bbappend)
 
 ## Build
 ```bash

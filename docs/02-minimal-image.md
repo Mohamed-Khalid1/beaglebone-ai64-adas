@@ -9,7 +9,7 @@ proving boot, networking, and C7x enablement before moving to the full EdgeAI im
 - USB-C network gadget (see below)
 - **No** graphics: `wayland opengl x11 vulkan opencl` all stripped for the `core` brand
 
-Recipe: [`yocto/meta-bbai64-minimal/recipes-core/images/bbai64-minimal-image.bb`](../yocto/meta-bbai64-minimal/recipes-core/images/bbai64-minimal-image.bb)
+Recipe: [`yocto/meta-bbai64/recipes-core/images/bbai64-minimal-image.bb`](../yocto/meta-bbai64/recipes-core/images/bbai64-minimal-image.bb)
 
 ## Build
 ```bash
@@ -50,7 +50,7 @@ external 3.3 V USB-TTL adapter. This is **not a fault**. We connect over the USB
 ### 3. USB-C networking that survives reboots
 The stock `g_ether` gadget **randomizes its MAC every boot**, so the host interface
 name (`enxXXXXXXXXXXXX`) changes on every plug — nothing could be hardcoded.
-**Fixes, implemented in the [`usb-gadget-net`](../yocto/meta-bbai64-minimal/recipes-connectivity/usb-gadget-net/) recipe:**
+**Fixes, implemented in the [`usb-gadget-net`](../yocto/meta-bbai64/recipes-connectivity/usb-gadget-net/) recipe:**
 - **Pin the MACs** via `/etc/modprobe.d/g_ether.conf`
   (`dev_addr=aa:bb:cc:00:00:02 host_addr=aa:bb:cc:00:00:01`) → the host iface is now a
   stable `enxaabbcc000001`.

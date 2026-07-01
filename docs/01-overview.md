@@ -25,7 +25,7 @@ boot, networking, and C7x enablement before layering the full EdgeAI/Qt stack on
 | `bbai64-minimal-image` | `core` | Console + SSH + Python3 bring-up platform, no graphics | [02](02-minimal-image.md) |
 | `tisdk-edgeai-image` | `edgeai` | Full C7x/MMA + Qt6/Weston ADAS target | [03](03-edgeai-image.md) |
 
-Both are produced from the **same custom layer** (`yocto/meta-bbai64-minimal/`) by
+Both are produced from the **same custom layer** (`yocto/meta-bbai64/`) by
 flipping `ARAGO_BRAND` — see [`config/README.md`](../config/README.md).
 
 ## How the AI deployment works (two-phase TIDL flow)

@@ -42,13 +42,13 @@ sstate cache instead.
 
 ---
 
-## 3. What was created — the `meta-bbai64-minimal` layer
+## 3. What was created — the `meta-bbai64` layer
 
-A dedicated layer at `/home/mohamedkhalid/tisdk/sources/meta-bbai64-minimal/`, with
+A dedicated layer at `/home/mohamedkhalid/tisdk/sources/meta-bbai64/`, with
 **BBFILE_PRIORITY 14** (deliberately above `meta-edgeai` = 13) so our bbappends win.
 
 ```
-meta-bbai64-minimal/
+meta-bbai64/
 ├── conf/layer.conf
 ├── recipes-core/images/
 │   └── bbai64-minimal-image.bb            # the target image recipe
